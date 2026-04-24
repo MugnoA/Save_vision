@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeVision Work</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #0b1f3a;
+      --navy-light:  #122848;
+      --navy-border: rgba(255,255,255,0.07);
+      --accent:      #2f80ed;
+      --accent-glow: rgba(47,128,237,0.18);
+      --danger:      #f04f4f;
+      --warning:     #f5a623;
+      --success:     #27ae60;
+      --bg:          #f0f2f5;
+      --surface:     #ffffff;
+      --border:      #e2e6ec;
+      --text-1:      #0d1b2a;
+      --text-2:      #4a5568;
+      --text-3:      #8a96a3;
+      --mono:        'IBM Plex Mono', monospace;
+      --sans:        'IBM Plex Sans', sans-serif;
+      --radius:      10px;
+      --sidebar-w:   220px;
+      --topbar-h:    52px;
+    }
+
+    html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text-1); font-size: 14px; }
+
+    /* ── LAYOUT ── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--navy-border);
+    }
+
+    .sidebar-logo {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .sidebar-logo .app-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+    .sidebar-logo .app-sub {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 3px;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+    }
+
+    .nav-group { padding: 16px 0 4px; }
+    .nav-group-label {
+      font-size: 9.5px;
+      font-family: var(--mono);
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.25);
+      padding: 0 18px 8px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.04); }
+    .nav-item.active {
+      color: #fff;
+      background: rgba(47,128,237,0.12);
+      border-left-color: var(--accent);
+    }
+    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-family: var(--mono);
+      padding: 1px 6px;
+      border-radius: 99px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .live-dot {
+      margin-left: auto;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 2px rgba(39,174,96,0.3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(39,174,96,0.3); }
+      50%       { box-shadow: 0 0 0 5px rgba(39,174,96,0.1); }
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px 18px;
+      border-top: 1px solid var(--navy-border);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .sidebar-footer .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      border: 1px solid rgba(47,128,237,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: var(--accent);
+    }
+    .sidebar-footer .user-name { font-size: 12px; color: rgba(255,255,255,0.55); }
+
+    /* ── MAIN AREA ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-1); }
+    .topbar-sep { width: 1px; height: 18px; background: var(--border); }
+    .topbar-area {
+      font-size: 12px;
+      color: var(--text-2);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .topbar-area svg { width: 12px; height: 12px; color: var(--text-3); }
+    .pill-live {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 6px;
+      background: #e8f8f0;
+      color: #1a7a46;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+    }
+    .pill-live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+    /* ── CONTENT GRID ── */
+    .content {
+      flex: 1;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 270px;
+      grid-template-rows: 1fr auto;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    /* ── VIDEO PANEL ── */
+    .video-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      grid-row: 1 / 3;
+    }
+    .panel-header {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .panel-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+    .panel-actions { display: flex; align-items: center; gap: 8px; }
+    .btn-sm {
+      font-size: 11.5px;
+      font-family: var(--sans);
+      color: var(--text-2);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .btn-sm:hover { background: #e4e8ef; color: var(--text-1); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #1a6fd4; }
+
+    .video-area {
+      flex: 1;
+      background: #08172a;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .video-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      color: rgba(255,255,255,0.15);
+      user-select: none;
+    }
+    .video-placeholder svg { width: 48px; height: 48px; }
+    .video-placeholder p { font-size: 13px; font-family: var(--mono); }
+
+    /* Bounding boxes */
+    .bbox {
+      position: absolute;
+      border: 2px solid;
+      border-radius: 4px;
+    }
+    .bbox-ok    { border-color: var(--success); }
+    .bbox-warn  { border-color: var(--warning); }
+    .bbox-alert { border-color: var(--danger); }
+    .bbox-tag {
+      position: absolute;
+      top: -22px; left: -2px;
+      font-size: 9.5px;
+      font-family: var(--mono);
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px 4px 0 0;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .tag-ok    { background: var(--success); }
+    .tag-warn  { background: var(--warning); }
+    .tag-alert { background: var(--danger); }
+
+    /* Timestamp overlay */
+    .video-overlay-ts {
+      position: absolute;
+      bottom: 12px; left: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+    }
+    .video-overlay-cam {
+      position: absolute;
+      top: 12px; left: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .video-overlay-cam .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--danger); animation: pulse 1.5s infinite; }
+
+    .video-toolbar {
+      padding: 9px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .source-label { font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
+
+    /* ── RIGHT COLUMN ── */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      grid-row: 1 / 3;
+    }
+    .right-col::-webkit-scrollbar { width: 4px; }
+    .right-col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .metric-card.span2 { grid-column: span 2; }
+    .metric-label { font-size: 10.5px; color: var(--text-3); font-family: var(--mono); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+    .metric-value { font-size: 26px; font-weight: 600; color: var(--text-1); line-height: 1; }
+    .metric-value.danger  { color: var(--danger); }
+    .metric-value.success { color: var(--success); }
+    .metric-value.warning { color: var(--warning); }
+    .metric-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+    /* Alerts panel */
+    .alerts-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex: 1;
+    }
+    .alert-list { overflow-y: auto; max-height: 260px; }
+    .alert-list::-webkit-scrollbar { width: 3px; }
+    .alert-list::-webkit-scrollbar-thumb { background: var(--border); }
+    .alert-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .alert-row:last-child { border-bottom: none; }
+    .alert-row:hover { background: var(--bg); }
+    .alert-icon {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .alert-icon.red    { background: var(--danger); box-shadow: 0 0 0 3px rgba(240,79,79,0.15); }
+    .alert-icon.amber  { background: var(--warning); box-shadow: 0 0 0 3px rgba(245,166,35,0.15); }
+    .alert-icon.green  { background: var(--success); box-shadow: 0 0 0 3px rgba(39,174,96,0.15); }
+    .alert-text-main { font-size: 12px; color: var(--text-1); line-height: 1.45; }
+    .alert-text-sub  { font-size: 10.5px; color: var(--text-3); margin-top: 2px; font-family: var(--mono); }
+
+    /* EPP breakdown */
+    .epp-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .epp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .epp-row:last-child { border-bottom: none; }
+    .epp-name { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+    .epp-icon { font-size: 14px; }
+    .epp-bar-wrap { flex: 1; margin: 0 12px; height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+    .epp-bar { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+    .epp-pct { font-size: 11.5px; font-family: var(--mono); font-weight: 500; min-width: 34px; text-align: right; }
+
+    /* ── HIDDEN PAGES ── */
+    .page { display: none; padding: 20px; overflow-y: auto; flex: 1; }
+    .page.active { display: block; }
+
+    /* Event log */
+    .events-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 10.5px;
+      font-family: var(--mono);
+      letter-spacing: 0.06em;
+      color: var(--text-3);
+      text-transform: uppercase;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8f9fb; }
+    .tag { display: inline-block; font-size: 11px; font-family: var(--mono); padding: 2px 8px; border-radius: 5px; font-weight: 500; }
+    .tag-danger  { background: #fde8e8; color: #b91c1c; }
+    .tag-warning { background: #fef3cd; color: #92400e; }
+    .tag-ok-bg   { background: #e6f8ee; color: #166534; }
+
+    /* Reports */
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .chart-title { font-size: 13px; font-weight: 500; margin-bottom: 14px; color: var(--text-1); }
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+    .bar-fill { width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; opacity: 0.8; transition: opacity 0.15s; }
+    .bar-fill:hover { opacity: 1; }
+    .bar-fill.danger { background: var(--danger); }
+    .bar-label { font-size: 10px; font-family: var(--mono); color: var(--text-3); }
+    .bar-val { font-size: 11px; font-family: var(--mono); color: var(--text-2); }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .page-title { font-size: 16px; font-weight: 600; color: var(--text-1); }
+
+    /* ── LIVE VIEW (wrapper) ── */
+    #view-live { display: flex; flex: 1; overflow: hidden; }
+    #view-live .content { flex: 1; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="app-name">SafeVision Work</div>
+      <div class="app-sub">PPE Security Dashboard</div>
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <div class="nav-group-label">Main</div>
+        <a class="nav-item active" onclick="showPage('live')" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Live view
+          <div class="live-dot"></div>
+        </a>
+        <a class="nav-item" onclick="showPage('events')" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Event log
+          <span class="nav-badge" id="badge-count">0</span>
+        </a>
+        <a class="nav-item" onclick="showPage('reports')" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Reports
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">System</div>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Cameras
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">SV</div>
+      <div class="user-name">Admin · v1.0</div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Live view</span>
+      <div class="topbar-sep"></div>
+      <div class="topbar-area">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Area: Production A
+      </div>
+      <div class="pill-live" id="topbar-pill">
+        <div class="dot"></div>
+        LIVE
+      </div>
+    </div>
+
+    <!-- ══ LIVE VIEW ══ -->
+    <div id="view-live">
+      <div class="content">
+
+        <!-- Video -->
+        <div class="video-panel">
+          <div class="panel-header">
+            <span class="panel-title">Camera 01 — Main entrance</span>
+            <div class="panel-actions">
+              <button class="btn-sm">Switch camera</button>
+              <button class="btn-sm btn-primary" onclick="document.getElementById('file-input').click()">Load video</button>
+              <input type="file" id="file-input" accept="video/*" style="display:none" onchange="loadVideo(this)"/>
+            </div>
+          </div>
+
+          <div class="video-area" id="video-area">
+            <canvas id="detection-canvas" style="
+              position: absolute;
+              top: 0; left: 0;
+              width: 100%; height: 100%;
+              z-index: 10;
+              pointer-events: none;
+            "></canvas>
+            <div class="video-placeholder" id="vid-placeholder">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14v-4zM3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/></svg>
+              <p>Camera / video not connected</p>
+            </div>
+
+            <div class="video-overlay-cam">
+              <div class="dot"></div>
+              CAM-01
+            </div>
+            <div class="video-overlay-ts" id="ts">-- : -- : --</div>
+          </div>
+
+          <div class="video-toolbar">
+            <span class="source-label">SOURCE:</span>
+            <button class="btn-sm btn-primary" id="btn-cam" onclick="startCamera()">Start camera</button>
+            <button class="btn-sm" onclick="stopStream()">Stop</button>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+
+          <!-- Metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card span2">
+              <div class="metric-label">Overall compliance</div>
+              <div class="metric-value success" id="met-cum">87%</div>
+              <div class="metric-sub">Current shift · Area: Production A</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Violations today</div>
+              <div class="metric-value danger" id="met-inc">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Persons on scene</div>
+              <div class="metric-value" id="met-per">0</div>
+            </div>
+          </div>
+
+          <!-- Recent alerts -->
+          <div class="alerts-panel">
+            <div class="panel-header">
+              <span class="panel-title">Recent alerts</span>
+              <span class="btn-sm" style="cursor:pointer" onclick="showPage('events')">View all →</span>
+            </div>
+            <div class="alert-list" id="alert-list">
+              <div class="alert-row">
+                <div class="alert-icon green"></div>
+                <div>
+                  <div class="alert-text-main">No violations detected</div>
+                  <div class="alert-text-sub">Waiting for video source...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EPP breakdown -->
+          <div class="epp-panel">
+            <div class="panel-header"><span class="panel-title">PPE detection breakdown</span></div>
+            <div class="epp-row">
+              <div class="epp-name"><span class="epp-icon">⛑</span> Helmet</div>
+              <div class="epp-bar-wrap"><div class="epp-bar" style="width:72%;background:var(--warning)"></div></div>
+              <div class="epp-pct" style="color:var(--warning)">72%</div>
+            </div>
+            <div class="epp-row">
+              <div class="epp-name"><span class="epp-icon">🦺</span> Vest</div>
+              <div class="epp-bar-wrap"><div class="epp-bar" style="width:88%"></div></div>
+              <div class="epp-pct" style="color:var(--accent)">88%</div>
+            </div>
+            <div class="epp-row">
+              <div class="epp-name"><span class="epp-icon">🥽</span> Glasses</div>
+              <div class="epp-bar-wrap"><div class="epp-bar" style="width:95%"></div></div>
+              <div class="epp-pct" style="color:var(--success)">95%</div>
+            </div>
+          </div>
+
+        </div><!-- /right-col -->
+      </div><!-- /content -->
+    </div><!-- /view-live -->
+
+    <!-- ══ EVENT LOG ══ -->
+    <div class="page" id="view-events">
+      <div class="page-header">
+        <div class="page-title">Event log</div>
+        <button class="btn-sm btn-primary">Export CSV</button>
+      </div>
+      <div class="events-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Area</th>
+              <th>Missing PPE</th>
+              <th>Confidence</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="events-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="page" id="view-reports">
+      <div class="page-header">
+        <div class="page-title">Reports</div>
+        <button class="btn-sm btn-primary">Download PDF</button>
+      </div>
+      <div class="report-grid">
+        <div class="chart-card">
+          <div class="chart-title">Violations by time slot</div>
+          <div class="bar-chart">
+            <div class="bar-col">
+              <div class="bar-val">3</div>
+              <div class="bar-fill danger" style="height:30%"></div>
+              <div class="bar-label">06h</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">7</div>
+              <div class="bar-fill danger" style="height:70%"></div>
+              <div class="bar-label">08h</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">5</div>
+              <div class="bar-fill danger" style="height:50%"></div>
+              <div class="bar-label">10h</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">10</div>
+              <div class="bar-fill danger" style="height:100%"></div>
+              <div class="bar-label">12h</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">6</div>
+              <div class="bar-fill danger" style="height:60%"></div>
+              <div class="bar-label">14h</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">2</div>
+              <div class="bar-fill danger" style="height:20%"></div>
+              <div class="bar-label">16h</div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Compliance by area (%)</div>
+          <div class="bar-chart">
+            <div class="bar-col">
+              <div class="bar-val">87%</div>
+              <div class="bar-fill" style="height:87%"></div>
+              <div class="bar-label">Prod. A</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">72%</div>
+              <div class="bar-fill" style="height:72%;background:var(--warning)"></div>
+              <div class="bar-label">Warehouse</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">95%</div>
+              <div class="bar-fill" style="height:95%;background:var(--success)"></div>
+              <div class="bar-label">Lab</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-val">80%</div>
+              <div class="bar-fill" style="height:80%;background:var(--warning)"></div>
+              <div class="bar-label">Entrance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Summary metrics -->
+      <div class="metrics-grid" style="max-width:600px">
+        <div class="metric-card">
+          <div class="metric-label">Total events today</div>
+          <div class="metric-value">33</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Critical alerts</div>
+          <div class="metric-value danger">12</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Compliance rate</div>
+          <div class="metric-value success">87%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Most violated PPE</div>
+          <div class="metric-value warning" style="font-size:16px;padding-top:4px">Helmet</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ EVIDENCE MODAL ══ -->
+<div id="evidence-modal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: var(--surface);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        width: 480px;
+        max-width: 90vw;
+        overflow: hidden;
+    ">
+        <!-- Header -->
+        <div style="
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        ">
+            <span style="font-size:13px;font-weight:500;color:var(--text-1)">Detection evidence</span>
+            <button onclick="closeModal()" style="
+                background: none;
+                border: none;
+                font-size: 18px;
+                color: var(--text-3);
+                cursor: pointer;
+                line-height: 1;
+            ">×</button>
+        </div>
+
+        <!-- Frame image -->
+        <div style="background:#08172a;min-height:200px;display:flex;align-items:center;justify-content:center;">
+            <img id="modal-image" src="" alt="Detection frame" style="
+                max-width: 100%;
+                max-height: 320px;
+                object-fit: contain;
+                display: block;
+            "/>
+            <span id="modal-no-image" style="
+                color:rgba(255,255,255,0.25);
+                font-family:var(--mono);
+                font-size:12px;
+                display:none;
+            ">No frame available</span>
+        </div>
+
+        <!-- Detection details -->
+        <div style="padding: 14px 16px;">
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                <tr>
+                    <td style="color:var(--text-3);padding:4px 0;font-family:var(--mono)">Timestamp</td>
+                    <td id="modal-timestamp" style="text-align:right;color:var(--text-1);font-family:var(--mono)"></td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-3);padding:4px 0;font-family:var(--mono)">Area</td>
+                    <td id="modal-area" style="text-align:right;color:var(--text-1)"></td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-3);padding:4px 0;font-family:var(--mono)">Person</td>
+                    <td id="modal-person" style="text-align:right;color:var(--text-1);font-family:var(--mono)"></td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-3);padding:4px 0;font-family:var(--mono)">Missing PPE</td>
+                    <td id="modal-epp" style="text-align:right;"></td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-3);padding:4px 0;font-family:var(--mono)">Confidence</td>
+                    <td id="modal-confidence" style="text-align:right;color:var(--text-1);font-family:var(--mono)"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
