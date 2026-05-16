@@ -19,10 +19,11 @@ os.makedirs(FRAMES_FOLDER, exist_ok=True)
 
 def get_db_connection():
     conn = psycopg2.connect(
-        host="localhost",
-        database="safevision",
-        user="postgres",
-        password="helmet2026"    # ← replace with your PostgreSQL password
+        host=os.environ.get("RDS_HOSTNAME"),
+        port=os.environ.get("RDS_PORT", "5432"),
+        database=os.environ.get("RDS_DB_NAME", "safevision"),
+        user=os.environ.get("RDS_USERNAME"),
+        password=os.environ.get("RDS_PASSWORD")
     )
     return conn
 
