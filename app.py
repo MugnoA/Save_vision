@@ -21,7 +21,7 @@ def get_db_connection():
     conn = psycopg2.connect(
         host=os.environ.get("RDS_HOSTNAME"),
         port=os.environ.get("RDS_PORT", "5432"),
-        database=os.environ.get("RDS_DB_NAME", "safevision"),
+        database=os.environ.get("RDS_DB_NAME", "ebdb")
         user=os.environ.get("RDS_USERNAME"),
         password=os.environ.get("RDS_PASSWORD")
     )
