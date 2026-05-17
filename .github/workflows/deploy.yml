@@ -52,6 +52,10 @@ jobs:
           cat > Dockerrun.aws.json << EOF
           {
             "AWSEBDockerrunVersion": "1",
+            "Authentication": {
+              "Bucket": "elasticbeanstalk-us-east-2-950639282365",
+              "Key": "docker-credentials"
+            },
             "Image": {
               "Name": "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG",
               "Update": "true"
